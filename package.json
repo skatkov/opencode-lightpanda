@@ -6,10 +6,7 @@
   "main": "index.ts",
   "exports": "./index.ts",
   "files": [
-    "index.ts",
-    "lightpanda.ts",
-    "README.md",
-    "LICENSE"
+    "lightpanda.ts"
   ],
   "scripts": {
     "check": "tsc",
