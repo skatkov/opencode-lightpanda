@@ -1,11 +1,8 @@
 {
   "compilerOptions": {
-    "lib": ["ESNext", "DOM"],
     "module": "Preserve",
-    "moduleResolution": "Bundler",
     "noEmit": true,
     "strict": true,
     "types": ["bun"]
-  },
-  "include": ["*.ts"]
+  }
 }
