@@ -24,12 +24,12 @@ test("returns a semantic tree", async () => {
   expect(result).toMatchObject({ output: expect.stringContaining("RootWebArea 'Example Domain'") })
 })
 
-test("rejects non-success HTTP statuses", async () => {
+test("rejects non-success HTTP statuses", () => {
   const request = lightpanda.execute(
     { url: "https://example.com/not-found", format: "markdown", timeout: 10 },
     makeContext(),
   )
-  await expect(request).rejects.toThrow("HTTP 404")
+  expect(request).rejects.toThrow("HTTP 404")
 })
 
 function makeContext(ask: ToolContext["ask"] = async () => {}) {

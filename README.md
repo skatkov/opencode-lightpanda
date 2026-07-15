@@ -24,8 +24,6 @@ If OpenCode cannot find Lightpanda, start it with `LIGHTPANDA_BIN` set to the ex
 
 ## Usage
 
-The plugin registers a `lightpanda` tool:
-
 ```ts
 lightpanda({
   url: "https://example.com",
@@ -55,7 +53,6 @@ Load the checkout directly by adding it to `~/.config/opencode/opencode.json`:
 ## Behavior
 
 - Adds a distinct `lightpanda` tool with its own URL permission.
-- Supports Lightpanda's `markdown`, `html`, `semantic_tree`, and `semantic_tree_text` dumps.
 - Returns an error for non-2xx responses and responses over 5 MB.
 - Blocks private-network requests, including subresources initiated by page JavaScript.
 - Disables Lightpanda telemetry unless `LIGHTPANDA_DISABLE_TELEMETRY` is already set.

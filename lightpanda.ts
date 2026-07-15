@@ -1,7 +1,6 @@
 import { tool } from "@opencode-ai/plugin"
 
 const MAX_RESPONSE_SIZE = 5 * 1024 * 1024
-const DEFAULT_TIMEOUT_SECONDS = 30
 const MAX_TIMEOUT_SECONDS = 120
 
 const responseSchema = tool.schema.object({
@@ -27,21 +26,19 @@ Supports markdown, HTML, and semantic tree dumps without graphical rendering.`,
       .optional()
       .describe("Timeout in seconds (max 120)"),
   },
-  async execute(args, context) {
-    const url = new URL(args.url)
+  async execute({ url: input, format = "markdown", timeout = 30 }, context) {
+    const url = new URL(input)
     if (url.protocol !== "http:" && url.protocol !== "https:") {
       throw new Error("URL must start with http:// or https://")
     }
 
-    const format = args.format ?? "markdown"
-    const timeoutSeconds = Math.min(args.timeout ?? DEFAULT_TIMEOUT_SECONDS, MAX_TIMEOUT_SECONDS)
-    const timeoutMs = Math.ceil(timeoutSeconds * 1000)
+    const timeoutMs = Math.ceil(timeout * 1000)
 
     await context.ask({
       permission: "lightpanda",
-      patterns: [args.url],
+      patterns: [input],
       always: ["*"],
-      metadata: { url: args.url, format, timeout: args.timeout },
+      metadata: { url: input, format, timeout },
     })
 
     const binary = process.env.LIGHTPANDA_BIN || Bun.which("lightpanda")
@@ -74,13 +71,13 @@ Supports markdown, HTML, and semantic tree dumps without graphical rendering.`,
     ]
     let result = await run(command, signal)
     if (format === "markdown" && result.exitCode === 0 && !result.stdout.trim()) {
-      const wait = command.indexOf("--wait-ms")
-      result = await run([...command.slice(0, wait), ...command.slice(wait + 2), "--wait-until", "networkidle"], signal)
+      command.splice(command.indexOf("--wait-ms"), 2, "--wait-until", "networkidle")
+      result = await run(command, signal)
     }
 
     const { stdout, stderr, exitCode } = result
     if (context.abort.aborted) throw new Error("Request aborted")
-    if (timeoutSignal.aborted) throw new Error(`Request timed out after ${timeoutSeconds} seconds`)
+    if (timeoutSignal.aborted) throw new Error(`Request timed out after ${timeout} seconds`)
     if (exitCode !== 0) throw new Error(stderr.trim() || `Lightpanda exited with status ${exitCode}`)
     if (Buffer.byteLength(stdout) > MAX_RESPONSE_SIZE) {
       throw new Error("Response too large (exceeds 5MB limit)")
@@ -102,7 +99,6 @@ Supports markdown, HTML, and semantic tree dumps without graphical rendering.`,
 
 async function run(command: string[], signal: AbortSignal) {
   const child = Bun.spawn(command, {
-    stdout: "pipe",
     stderr: "pipe",
     signal,
     env: {
