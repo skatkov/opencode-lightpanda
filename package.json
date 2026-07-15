@@ -1,0 +1,35 @@
+{
+  "name": "opencode-lightpanda",
+  "version": "0.1.0",
+  "description": "Lightpanda-powered web fetching for OpenCode",
+  "type": "module",
+  "main": "index.ts",
+  "exports": "./index.ts",
+  "files": [
+    "index.ts",
+    "lightpanda.ts",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "check": "tsc --noEmit",
+    "test": "bun test",
+    "prepublishOnly": "bun run check && bun test"
+  },
+  "keywords": [
+    "opencode",
+    "opencode-plugin",
+    "lightpanda",
+    "headless-browser",
+    "ai-agents"
+  ],
+  "author": "Stanislav (Stas) Katkov <git@skatkov.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@opencode-ai/plugin": "^1.18.2"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "latest"
+  }
+}
