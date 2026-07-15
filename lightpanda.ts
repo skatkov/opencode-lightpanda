@@ -4,12 +4,12 @@ const MAX_RESPONSE_SIZE = 5 * 1024 * 1024
 const DEFAULT_TIMEOUT_SECONDS = 30
 const MAX_TIMEOUT_SECONDS = 120
 
-type LightpandaResponse = {
-  url: string
-  http_status: number
-  headers: Array<{ name: string; value: string }>
-  content: string
-}
+const responseSchema = tool.schema.object({
+  url: tool.schema.string(),
+  http_status: tool.schema.number(),
+  headers: tool.schema.array(tool.schema.object({ name: tool.schema.string(), value: tool.schema.string() })),
+  content: tool.schema.string(),
+})
 
 export default tool({
   description: `Fetch a URL with Lightpanda and return its JavaScript-rendered content.
@@ -118,23 +118,14 @@ async function run(command: string[], signal: AbortSignal) {
   return { stdout, stderr, exitCode }
 }
 
-function parseResponse(output: string): LightpandaResponse {
-  let value: unknown
+function parseResponse(output: string) {
+  let response
   try {
-    value = JSON.parse(output)
+    response = responseSchema.safeParse(JSON.parse(output))
   } catch {
     throw new Error("Lightpanda returned invalid JSON")
   }
 
-  if (
-    typeof value !== "object" ||
-    value === null ||
-    !("url" in value) ||
-    !("http_status" in value) ||
-    !("headers" in value) ||
-    !("content" in value)
-  ) {
-    throw new Error("Lightpanda returned an unexpected response")
-  }
-  return value as LightpandaResponse
+  if (!response.success) throw new Error("Lightpanda returned an unexpected response")
+  return response.data
 }
