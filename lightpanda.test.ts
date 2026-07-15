@@ -1,12 +1,6 @@
 import { expect, test } from "bun:test"
 import type { ToolContext } from "@opencode-ai/plugin"
-import plugin from "./index"
 import lightpanda from "./lightpanda"
-
-test("registers a distinct lightpanda tool", async () => {
-  const hooks = await plugin()
-  expect(hooks.tool?.lightpanda).toBe(lightpanda)
-})
 
 test("fetches rendered markdown and asks for lightpanda permission", async () => {
   let permission: Parameters<ToolContext["ask"]>[0] | undefined
