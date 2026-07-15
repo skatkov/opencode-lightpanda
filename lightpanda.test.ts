@@ -11,9 +11,7 @@ test("fetches rendered markdown and asks for lightpanda permission", async () =>
     }),
   )
 
-  expect(result).toBeObject()
-  if (typeof result === "string") throw new Error("Expected a structured result")
-  expect(result.output).toContain("Outdoor Odyssey Nomad Backpack")
+  expect(result).toMatchObject({ output: expect.stringContaining("Outdoor Odyssey Nomad Backpack") })
   expect(permission?.permission).toBe("lightpanda")
 })
 
@@ -23,9 +21,7 @@ test("returns a semantic tree", async () => {
     makeContext(),
   )
 
-  expect(result).toBeObject()
-  if (typeof result === "string") throw new Error("Expected a structured result")
-  expect(result.output).toContain("RootWebArea 'Example Domain'")
+  expect(result).toMatchObject({ output: expect.stringContaining("RootWebArea 'Example Domain'") })
 })
 
 test("rejects non-success HTTP statuses", async () => {
