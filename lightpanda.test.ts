@@ -16,7 +16,7 @@ afterAll(() => {
 test("constructs the command and asks for lightpanda permission", async () => {
   let permission: Parameters<ToolContext["ask"]>[0] | undefined
   const result = await lightpanda.execute(
-    { url: "https://example.test/command", format: "semantic_tree_text", timeout: 1 },
+    { url: "https://example.test/command", format: "json", timeout: 1 },
     makeContext({ ask: async (input) => void (permission = input) }),
   )
 
@@ -25,7 +25,7 @@ test("constructs the command and asks for lightpanda permission", async () => {
     "fetch",
     "https://example.test/command",
     "--dump",
-    "semantic_tree_text",
+    "semantic_tree",
     "--json",
     "--wait-ms",
     "1000",
@@ -44,46 +44,44 @@ test("constructs the command and asks for lightpanda permission", async () => {
   expect(permission?.permission).toBe("lightpanda")
 })
 
-test("rejects non-success HTTP statuses", () => {
-  const request = lightpanda.execute(
-    { url: "https://example.test/not-found", format: "markdown", timeout: 1 },
-    makeContext(),
-  )
-  return expect(request).rejects.toThrow("HTTP 404")
-})
-
-test("rejects malformed JSON", () => {
-  const request = lightpanda.execute(
-    { url: "https://example.test/malformed", format: "markdown", timeout: 1 },
-    makeContext(),
-  )
-  return expect(request).rejects.toThrow("invalid JSON")
-})
-
-test("rejects oversized output", () => {
-  const request = lightpanda.execute(
-    { url: "https://example.test/oversized", format: "markdown", timeout: 1 },
-    makeContext(),
-  )
-  return expect(request).rejects.toThrow("Response too large")
-})
-
-test("times out the Lightpanda process", () => {
-  const request = lightpanda.execute(
-    { url: "https://example.test/slow", format: "markdown", timeout: 0.01 },
-    makeContext(),
-  )
-  return expect(request).rejects.toThrow("Request timed out after 0.01 seconds")
-})
-
-test("aborts the Lightpanda process", () => {
+test.each([
+  ["rejects non-success HTTP statuses", "not-found", "markdown", 1, "HTTP 404", false],
+  [
+    "reports navigation failures independently of markdown output",
+    "navigation-failed",
+    "markdown",
+    1,
+    /^Navigation failed for https:\/\/example\.test\/navigation-failed$/,
+    false,
+  ],
+  [
+    "reports navigation failures independently of json output",
+    "navigation-failed",
+    "json",
+    1,
+    /^Navigation failed for https:\/\/example\.test\/navigation-failed$/,
+    false,
+  ],
+  [
+    "reports navigation failures independently of semantic_tree output",
+    "navigation-failed",
+    "semantic_tree",
+    1,
+    /^Navigation failed for https:\/\/example\.test\/navigation-failed$/,
+    false,
+  ],
+  ["rejects malformed JSON", "malformed", "markdown", 1, "invalid JSON", false],
+  ["rejects oversized output", "oversized", "markdown", 1, "Response too large", false],
+  ["times out the Lightpanda process", "slow", "markdown", 0.01, "Request timed out after 0.01 seconds", false],
+  ["aborts the Lightpanda process", "slow", "markdown", 1, "Request aborted", true],
+] as const)("%s", (_, path, format, timeout, error, abort) => {
   const controller = new AbortController()
   const request = lightpanda.execute(
-    { url: "https://example.test/slow", format: "markdown", timeout: 1 },
+    { url: `https://example.test/${path}`, format, timeout },
     makeContext({ abort: controller.signal }),
   )
-  setTimeout(() => controller.abort(), 10)
-  return expect(request).rejects.toThrow("Request aborted")
+  if (abort) setTimeout(() => controller.abort(), 10)
+  return expect(request).rejects.toThrow(error)
 })
 
 function makeContext({

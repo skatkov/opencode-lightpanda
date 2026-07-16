@@ -12,13 +12,13 @@ const responseSchema = tool.schema.object({
 
 export default tool({
   description: `Fetch a URL with Lightpanda and return its JavaScript-rendered content.
-Supports markdown, HTML, and semantic tree dumps without graphical rendering.`,
+Supports markdown and structured JSON dumps without graphical rendering.`,
   args: {
     url: tool.schema.string().describe("The fully qualified HTTP or HTTPS URL to fetch"),
     format: tool.schema
-      .enum(["markdown", "html", "semantic_tree", "semantic_tree_text"])
+      .enum(["markdown", "json", "semantic_tree"])
       .optional()
-      .describe("The Lightpanda dump format. Defaults to markdown."),
+      .describe("The output format. Defaults to markdown."),
     timeout: tool.schema
       .number()
       .positive()
@@ -33,6 +33,7 @@ Supports markdown, HTML, and semantic tree dumps without graphical rendering.`,
     }
 
     const timeoutMs = Math.ceil(timeout * 1000)
+    const dump = format === "json" ? "semantic_tree" : format
 
     await context.ask({
       permission: "lightpanda",
@@ -53,7 +54,7 @@ Supports markdown, HTML, and semantic tree dumps without graphical rendering.`,
       "fetch",
       url.href,
       "--dump",
-      format,
+      dump,
       "--json",
       "--wait-ms",
       timeoutMs.toString(),
@@ -78,6 +79,9 @@ Supports markdown, HTML, and semantic tree dumps without graphical rendering.`,
     }
 
     const response = parseResponse(stdout)
+    if (response.http_status <= 0) {
+      throw new Error(`Navigation failed for ${response.url}`)
+    }
     if (response.http_status < 200 || response.http_status >= 300) {
       throw new Error(`Request failed with HTTP ${response.http_status}`)
     }

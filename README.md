@@ -1,6 +1,6 @@
 # opencode-lightpanda
 
-A Lightpanda plugin for OpenCode. It adds a separate `lightpanda` tool that executes page JavaScript and returns markdown, HTML, or semantic trees without graphical rendering.
+A Lightpanda plugin for OpenCode. It adds a separate `lightpanda` tool that executes page JavaScript and returns markdown or structured JSON without graphical rendering.
 
 ## Features
 OpenCode WebFetch on steroids (c)
@@ -22,7 +22,13 @@ OpenCode WebFetch on steroids (c)
 Install Lightpanda, then install the plugin globally:
 
 ```sh
-opencode plugin -g opencode-lightpanda
+opencode plugin -g opencode-lightpanda@latest
+```
+
+To update an existing installation:
+
+```sh
+opencode plugin -g -f opencode-lightpanda@latest
 ```
 
 Quit and restart OpenCode. The built-in `webfetch` tool remains unchanged.
@@ -39,7 +45,7 @@ lightpanda({
 })
 ```
 
-Available formats are `markdown`, `html`, `semantic_tree`, and `semantic_tree_text`.
+Available formats are `markdown`, `json`, and `semantic_tree`. `json` is an alias for `semantic_tree`.
 
 ## Local Development
 
