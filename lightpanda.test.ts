@@ -1,17 +1,8 @@
-import { afterAll, beforeAll, expect, test } from "bun:test"
+import { expect, test } from "bun:test"
 import type { ToolContext } from "@opencode-ai/plugin"
 import lightpanda from "./lightpanda"
 
-const originalBinary = process.env.LIGHTPANDA_BIN
-
-beforeAll(() => {
-  process.env.LIGHTPANDA_BIN = `${import.meta.dir}/test/fixtures/lightpanda`
-})
-
-afterAll(() => {
-  if (originalBinary === undefined) delete process.env.LIGHTPANDA_BIN
-  else process.env.LIGHTPANDA_BIN = originalBinary
-})
+process.env.LIGHTPANDA_BIN = `${import.meta.dir}/test/fixtures/lightpanda`
 
 test("constructs the command and asks for lightpanda permission", async () => {
   let permission: Parameters<ToolContext["ask"]>[0] | undefined
