@@ -2,7 +2,14 @@
 
 A Lightpanda plugin for OpenCode. It adds a separate `lightpanda` tool that executes page JavaScript and returns markdown, HTML, or semantic trees without graphical rendering.
 
-This project is not affiliated with the OpenCode or Lightpanda teams.
+## Features
+OpenCode WebFetch on steroids (c)
+
+- Headless, doesn't have any graphics rendering engine
+- 10x faster than headless Chrome, 16x less memory
+- Can return markdown results with ads or clutter
+- JSON data could be returned for extractions
+- Handles JS heavy websites like a pro
 
 ## Requirements
 
