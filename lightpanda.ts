@@ -69,13 +69,7 @@ Supports markdown, HTML, and semantic tree dumps without graphical rendering.`,
       "--log-level",
       "error",
     ]
-    let result = await run(command, signal)
-    if (format === "markdown" && result.exitCode === 0 && !result.stdout.trim()) {
-      command.splice(command.indexOf("--wait-ms"), 2, "--wait-until", "networkidle")
-      result = await run(command, signal)
-    }
-
-    const { stdout, stderr, exitCode } = result
+    const { stdout, stderr, exitCode } = await run(command, signal)
     if (context.abort.aborted) throw new Error("Request aborted")
     if (timeoutSignal.aborted) throw new Error(`Request timed out after ${timeout} seconds`)
     if (exitCode !== 0) throw new Error(stderr.trim() || `Lightpanda exited with status ${exitCode}`)
