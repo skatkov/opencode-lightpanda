@@ -64,7 +64,19 @@ Supports markdown and structured JSON dumps without graphical rendering.`,
       "--log-level",
       "error",
     ]
-    const { stdout, stderr, exitCode } = await run(command, signal)
+    const child = Bun.spawn(command, {
+      stderr: "pipe",
+      signal,
+      env: {
+        ...process.env,
+        LIGHTPANDA_DISABLE_TELEMETRY: process.env.LIGHTPANDA_DISABLE_TELEMETRY ?? "true",
+      },
+    })
+    const [stdout, stderr, exitCode] = await Promise.all([
+      (child.stdout as typeof child.stdout & { text(): Promise<string> }).text(),
+      (child.stderr as typeof child.stderr & { text(): Promise<string> }).text(),
+      child.exited,
+    ])
     if (context.abort.aborted) throw new Error("Request aborted")
     if (timeoutSignal.aborted) throw new Error(`Request timed out after ${timeout} seconds`)
     if (exitCode !== 0) throw new Error(stderr.trim() || `Lightpanda exited with status ${exitCode}`)
@@ -88,23 +100,6 @@ Supports markdown and structured JSON dumps without graphical rendering.`,
     }
   },
 })
-
-async function run(command: string[], signal: AbortSignal) {
-  const child = Bun.spawn(command, {
-    stderr: "pipe",
-    signal,
-    env: {
-      ...process.env,
-      LIGHTPANDA_DISABLE_TELEMETRY: process.env.LIGHTPANDA_DISABLE_TELEMETRY ?? "true",
-    },
-  })
-  const [stdout, stderr, exitCode] = await Promise.all([
-    new Response(child.stdout).text(),
-    new Response(child.stderr).text(),
-    child.exited,
-  ])
-  return { stdout, stderr, exitCode }
-}
 
 function parseResponse(output: string) {
   let response
