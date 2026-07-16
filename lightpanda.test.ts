@@ -30,14 +30,14 @@ test("constructs the command and asks for lightpanda permission", async () => {
 })
 
 test.each([
-  ["rejects non-success HTTP statuses", "not-found", "markdown", 1, "HTTP 404", false],
-  ["rejects malformed JSON", "malformed", "markdown", 1, "invalid JSON", false],
-  ["rejects oversized output", "oversized", "markdown", 1, "Response too large", false],
-  ["times out the Lightpanda process", "slow", "markdown", 0.01, "Request timed out after 0.01 seconds", false],
-  ["aborts the Lightpanda process", "slow", "markdown", 1, "Request aborted", true],
-] as const)("%s", (_, path, format, timeout, error, abort) => {
+  ["rejects non-success HTTP statuses", "not-found", 1, "HTTP 404", false],
+  ["rejects malformed JSON", "malformed", 1, "invalid JSON", false],
+  ["rejects oversized output", "oversized", 1, "Response too large", false],
+  ["times out the Lightpanda process", "slow", 0.01, "Request timed out after 0.01 seconds", false],
+  ["aborts the Lightpanda process", "slow", 1, "Request aborted", true],
+] as const)("%s", (_, path, timeout, error, abort) => {
   const request = lightpanda.execute(
-    { url: `https://example.test/${path}`, format, timeout },
+    { url: `https://example.test/${path}`, timeout },
     makeContext({ abort: abort ? AbortSignal.timeout(10) : undefined }),
   )
   return expect(request).rejects.toThrow(error)
