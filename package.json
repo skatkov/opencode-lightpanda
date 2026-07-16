@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "description": "Lightpanda-powered web fetching for OpenCode",
   "type": "module",
-  "main": "index.ts",
-  "exports": "./index.ts",
+  "main": "lightpanda.ts",
+  "exports": "./lightpanda.ts",
   "files": [
     "lightpanda.ts"
   ],

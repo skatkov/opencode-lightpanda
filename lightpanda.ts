@@ -1,4 +1,4 @@
-import { tool } from "@opencode-ai/plugin"
+import { tool, type Plugin } from "@opencode-ai/plugin"
 
 const MAX_RESPONSE_SIZE = 5 * 1024 * 1024
 const MAX_TIMEOUT_SECONDS = 120
@@ -10,7 +10,7 @@ const responseSchema = tool.schema.object({
   content: tool.schema.string(),
 })
 
-export default tool({
+export const lightpanda = tool({
   description: `Fetch a URL with Lightpanda and return its JavaScript-rendered content.
 Supports markdown and structured JSON dumps without graphical rendering.`,
   args: {
@@ -117,3 +117,7 @@ function parseResponse(output: string) {
   if (!response.success) throw new Error("Lightpanda returned an unexpected response")
   return response.data
 }
+
+export default (async () => ({
+  tool: { lightpanda },
+})) satisfies Plugin

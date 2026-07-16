@@ -59,7 +59,7 @@ Load the checkout directly by adding it to `~/.config/opencode/opencode.json`:
 
 ```json
 {
-  "plugin": ["file:///absolute/path/to/opencode-lightpanda/index.ts"]
+  "plugin": ["file:///absolute/path/to/opencode-lightpanda/lightpanda.ts"]
 }
 ```
 
