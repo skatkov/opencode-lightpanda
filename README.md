@@ -28,7 +28,7 @@ To update an existing installation:
 opencode plugin -g -f opencode-lightpanda@latest
 ```
 
-Quit and restart OpenCode. The built-in `webfetch` tool remains unchanged.
+Quit and restart OpenCode. 
 
 If OpenCode cannot find Lightpanda, start it with `LIGHTPANDA_BIN` set to the executable's absolute path.
 
@@ -42,7 +42,7 @@ lightpanda({
 })
 ```
 
-Available formats are `markdown`, `json`, and `semantic_tree`. `json` is an alias for `semantic_tree`.
+Available formats are `markdown`, `json`, and `semantic_tree`.
 
 ## Local Development
 
