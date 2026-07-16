@@ -10,15 +10,11 @@ if (url.pathname === "/malformed") {
 } else if (url.pathname === "/slow") {
   await Bun.sleep(10_000)
 } else {
-  const navigationFailed = url.pathname === "/navigation-failed"
-  if (navigationFailed) {
-    process.stderr.write('$scope=frame $level=error $msg="navigate failed" err=CouldntResolveHost\n')
-  }
   process.stdout.write(
     JSON.stringify({
       url: url.href,
-      http_status: navigationFailed ? 0 : url.pathname === "/not-found" ? 404 : 200,
-      headers: navigationFailed ? [] : [{ name: "Content-Type", value: "text/plain" }],
+      http_status: url.pathname === "/not-found" ? 404 : 200,
+      headers: [{ name: "Content-Type", value: "text/plain" }],
       content: url.pathname === "/command" ? JSON.stringify(args) : "fixture content",
     }),
   )

@@ -85,9 +85,6 @@ Supports markdown and structured JSON dumps without graphical rendering.`,
     }
 
     const response = parseResponse(stdout)
-    if (response.http_status <= 0) {
-      throw new Error(`Navigation failed for ${response.url}`)
-    }
     if (response.http_status < 200 || response.http_status >= 300) {
       throw new Error(`Request failed with HTTP ${response.http_status}`)
     }

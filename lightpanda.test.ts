@@ -31,14 +31,6 @@ test("constructs the command and asks for lightpanda permission", async () => {
 
 test.each([
   ["rejects non-success HTTP statuses", "not-found", "markdown", 1, "HTTP 404", false],
-  [
-    "reports navigation failures independently of markdown output",
-    "navigation-failed",
-    "markdown",
-    1,
-    /^Navigation failed for https:\/\/example\.test\/navigation-failed$/,
-    false,
-  ],
   ["rejects malformed JSON", "malformed", "markdown", 1, "invalid JSON", false],
   ["rejects oversized output", "oversized", "markdown", 1, "Response too large", false],
   ["times out the Lightpanda process", "slow", "markdown", 0.01, "Request timed out after 0.01 seconds", false],
