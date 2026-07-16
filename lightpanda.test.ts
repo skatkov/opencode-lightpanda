@@ -36,12 +36,10 @@ test.each([
   ["times out the Lightpanda process", "slow", "markdown", 0.01, "Request timed out after 0.01 seconds", false],
   ["aborts the Lightpanda process", "slow", "markdown", 1, "Request aborted", true],
 ] as const)("%s", (_, path, format, timeout, error, abort) => {
-  const controller = new AbortController()
   const request = lightpanda.execute(
     { url: `https://example.test/${path}`, format, timeout },
-    makeContext({ abort: controller.signal }),
+    makeContext({ abort: abort ? AbortSignal.timeout(10) : undefined }),
   )
-  if (abort) setTimeout(() => controller.abort(), 10)
   return expect(request).rejects.toThrow(error)
 })
 
