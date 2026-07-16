@@ -10,7 +10,7 @@ const responseSchema = tool.schema.object({
   content: tool.schema.string(),
 })
 
-export const lightpanda = tool({
+const lightpanda = tool({
   description: `Fetch a URL with Lightpanda and return its JavaScript-rendered content.
 Supports markdown and structured JSON dumps without graphical rendering.`,
   args: {

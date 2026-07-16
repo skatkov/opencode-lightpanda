@@ -1,8 +1,9 @@
 import { expect, test } from "bun:test"
 import type { ToolContext } from "@opencode-ai/plugin"
-import { lightpanda } from "./lightpanda"
+import plugin from "./lightpanda"
 
 process.env.LIGHTPANDA_BIN = `${import.meta.dir}/test/fixtures/lightpanda`
+const { lightpanda } = (await plugin()).tool
 
 test("constructs the command and asks for lightpanda permission", async () => {
   let permission: Parameters<ToolContext["ask"]>[0] | undefined
