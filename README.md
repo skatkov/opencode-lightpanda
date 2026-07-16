@@ -1,6 +1,5 @@
 # opencode-lightpanda
-
-A Lightpanda browser plugin/tool for OpenCode. Lightpanda browser is like a WebFetch tool on steroids.
+A Lightpanda browser plugin/tool for OpenCode. Lightpanda browser is like WebFetch tool on steroids.
 
 ## Features
 - Headless
