@@ -14,7 +14,7 @@ export const lightpanda = tool({
   description: `Fetch a URL with Lightpanda and return its JavaScript-rendered content.
 Supports markdown and structured JSON dumps without graphical rendering.`,
   args: {
-    url: tool.schema.string().describe("The fully qualified HTTP or HTTPS URL to fetch"),
+    url: tool.schema.url({ protocol: /^https?$/, normalize: true }).describe("The fully qualified HTTP or HTTPS URL to fetch"),
     format: tool.schema
       .enum(["markdown", "json", "semantic_tree"])
       .optional()
@@ -26,20 +26,15 @@ Supports markdown and structured JSON dumps without graphical rendering.`,
       .optional()
       .describe("Timeout in seconds (max 120)"),
   },
-  async execute({ url: input, format = "markdown", timeout = 30 }, context) {
-    const url = new URL(input)
-    if (url.protocol !== "http:" && url.protocol !== "https:") {
-      throw new Error("URL must start with http:// or https://")
-    }
-
+  async execute({ url, format = "markdown", timeout = 30 }, context) {
     const timeoutMs = Math.ceil(timeout * 1000)
     const dump = format === "json" ? "semantic_tree" : format
 
     await context.ask({
       permission: "lightpanda",
-      patterns: [input],
+      patterns: [url],
       always: ["*"],
-      metadata: { url: input, format, timeout },
+      metadata: { url, format, timeout },
     })
 
     const binary = process.env.LIGHTPANDA_BIN || Bun.which("lightpanda")
@@ -52,7 +47,7 @@ Supports markdown and structured JSON dumps without graphical rendering.`,
     const command = [
       binary,
       "fetch",
-      url.href,
+      url,
       "--dump",
       dump,
       "--json",
