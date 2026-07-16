@@ -7,9 +7,9 @@ OpenCode WebFetch on steroids (c)
 
 - Headless, doesn't have any graphics rendering engine
 - 10x faster than headless Chrome, 16x less memory
-- Can return markdown results with ads or clutter
-- JSON data could be returned for extractions
-- Handles JS heavy websites like a pro
+- Can return markdown results without ads or clutter
+- JSON data could be returned for data extractions
+- Handle JS heavy websites like a pro
 
 ## Requirements
 
