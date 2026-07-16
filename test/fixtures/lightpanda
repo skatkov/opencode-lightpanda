@@ -2,7 +2,6 @@
 
 const args = process.argv.slice(2)
 const url = new URL(args[1])
-const format = args[3]
 
 if (url.pathname === "/malformed") {
   process.stdout.write("{")
@@ -12,28 +11,6 @@ if (url.pathname === "/malformed") {
   await Bun.sleep(10_000)
 } else {
   const navigationFailed = url.pathname === "/navigation-failed"
-  const navigationContent = {
-    markdown: "\n# Navigation failed\n\nReason: CouldntResolveHost\n",
-    semantic_tree: JSON.stringify({
-      nodeId: "1",
-      backendDOMNodeId: 1,
-      nodeName: "root",
-      xpath: "",
-      nodeType: 9,
-      children: [
-        {
-          nodeId: "2",
-          backendDOMNodeId: 2,
-          nodeName: "h1",
-          xpath: "/html[1]/body[1]/h1[1]",
-          nodeType: 1,
-          role: "heading",
-          name: "Navigation failed",
-          children: [],
-        },
-      ],
-    }),
-  }
   if (navigationFailed) {
     process.stderr.write('$scope=frame $level=error $msg="navigate failed" err=CouldntResolveHost\n')
   }
@@ -42,13 +19,7 @@ if (url.pathname === "/malformed") {
       url: url.href,
       http_status: navigationFailed ? 0 : url.pathname === "/not-found" ? 404 : 200,
       headers: navigationFailed ? [] : [{ name: "Content-Type", value: "text/plain" }],
-      dump: format,
-      content:
-        url.pathname === "/command"
-          ? JSON.stringify(args)
-          : navigationFailed
-            ? navigationContent[format]
-            : "fixture content",
+      content: url.pathname === "/command" ? JSON.stringify(args) : "fixture content",
     }),
   )
 }
