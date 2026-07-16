@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "module": "Preserve",
+    "target": "ES2022",
     "noEmit": true,
     "strict": true,
     "types": ["bun"]
