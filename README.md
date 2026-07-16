@@ -1,15 +1,13 @@
 # opencode-lightpanda
 
-A Lightpanda plugin for OpenCode. It adds a separate `lightpanda` tool that executes page JavaScript and returns markdown or structured JSON without graphical rendering.
+A Lightpanda browser plugin/tool for OpenCode. Lightpanda browser is like a WebFetch tool on steroids.
 
 ## Features
-OpenCode WebFetch on steroids (c)
-
-- Headless, doesn't have any graphics rendering engine
+- Headless
 - 10x faster than headless Chrome, 16x less memory
-- Can return markdown results without ads or clutter
-- JSON data could be returned for data extractions
-- Handle JS heavy websites like a pro
+- Return markdown page without ads or clutter
+- Also returns extracted JSON data
+- Handles JS heavy websites like a pro
 
 ## Requirements
 
