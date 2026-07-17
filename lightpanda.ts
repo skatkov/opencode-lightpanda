@@ -3,6 +3,7 @@ import { tool, type Plugin } from "@opencode-ai/plugin"
 const MAX_RESPONSE_SIZE = 5 * 1024 * 1024
 const MAX_TIMEOUT_SECONDS = 120
 const PROCESS_GRACE_MS = 1_000
+const GOOGLE_SEARCH_HOST = /(^|\.)google\.[a-z.]+$/
 
 const responseSchema = tool.schema.object({
   url: tool.schema.string(),
@@ -13,7 +14,7 @@ const responseSchema = tool.schema.object({
 
 const lightpanda = tool({
   description: `Fetch a URL with Lightpanda browser to extract content as markdown or json.
-For web searches, use DuckDuckGo instead of Google because Google blocks Lightpanda due to browser fingerprinting.`,
+Google search URLs are rewritten to DuckDuckGo because Google blocks Lightpanda due to browser fingerprinting.`,
   args: {
     url: tool.schema.url({ protocol: /^https?$/, normalize: true }).describe("The fully qualified HTTP or HTTPS URL to fetch"),
     format: tool.schema
@@ -31,6 +32,13 @@ For web searches, use DuckDuckGo instead of Google because Google blocks Lightpa
     const timeoutMs = Math.ceil(timeout * 1000)
     const waitMs = Math.max(1, timeoutMs - PROCESS_GRACE_MS)
     const dump = format === "json" ? "semantic_tree" : format
+    const target = new URL(url)
+    const query = target.searchParams.get("q")
+    if (target.pathname === "/search" && GOOGLE_SEARCH_HOST.test(target.hostname) && query) {
+      const search = new URL("https://html.duckduckgo.com/html/")
+      search.searchParams.set("q", query)
+      url = search.href
+    }
 
     await context.ask({
       permission: "lightpanda",

@@ -32,6 +32,18 @@ test("constructs the command and asks for lightpanda permission", async () => {
   expect(permission?.permission).toBe("lightpanda")
 })
 
+test("rewrites Google searches to DuckDuckGo", async () => {
+  let permission: Parameters<ToolContext["ask"]>[0] | undefined
+  const result = await lightpanda.execute(
+    { url: "https://www.google.co.uk/search?q=lightpanda+browser&source=hp", timeout: 2 },
+    makeContext({ ask: async (input) => void (permission = input) }),
+  )
+
+  if (typeof result === "string") throw new Error("Expected a structured tool result")
+  expect(permission?.patterns).toEqual(["https://html.duckduckgo.com/html/?q=lightpanda+browser"])
+  expect(result.title).toStartWith("https://html.duckduckgo.com/html/?q=lightpanda+browser")
+})
+
 test.each([
   ["rejects non-success HTTP statuses", "not-found", 1, "HTTP 404", false],
   ["rejects malformed JSON", "malformed", 1, "invalid JSON", false],
