@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test"
 import type { ToolContext } from "@opencode-ai/plugin"
-import plugin, { resolveUrl } from "./lightpanda"
+import plugin, { GOOGLE_SEARCH_DOMAINS, resolveUrl } from "./lightpanda"
 
 process.env.LIGHTPANDA_BIN = `${import.meta.dir}/test/fixtures/lightpanda`
 const { lightpanda } = (await plugin()).tool
@@ -49,16 +49,11 @@ test("rewrites Google searches to DuckDuckGo", async () => {
   expect(result.metadata).toMatchObject({ requestedUrl, targetUrl })
 })
 
-test.each([
-  ["http", "google.com"],
-  ["https", "google.com"],
-  ["http", "www.google.com"],
-  ["https", "www.google.com"],
-  ["http", "google.co.uk"],
-  ["https", "google.co.uk"],
-  ["http", "www.google.co.uk"],
-  ["https", "www.google.co.uk"],
-] as const)("rewrites %s://%s searches", (scheme, hostname) => {
+const googleSearchCases = GOOGLE_SEARCH_DOMAINS.flatMap((domain) =>
+  [domain, `www.${domain}`].flatMap((hostname) => ["http", "https"].map((scheme) => [scheme, hostname] as const)),
+)
+
+test.each(googleSearchCases)("rewrites %s://%s searches", (scheme, hostname) => {
   const requestedUrl = `${scheme}://${hostname}/search?q=lightpanda+browser&source=hp`
   expect(resolveUrl(requestedUrl).targetUrl).toBe("https://html.duckduckgo.com/html/?q=lightpanda+browser")
 })
