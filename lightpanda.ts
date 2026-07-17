@@ -29,7 +29,6 @@ For web searches, use DuckDuckGo instead of Google because Google blocks Lightpa
   },
   async execute({ url, format = "markdown", timeout = 30 }, context) {
     const timeoutMs = Math.ceil(timeout * 1000)
-    const waitMs = Math.max(1, timeoutMs - PROCESS_GRACE_MS)
     const dump = format === "json" ? "semantic_tree" : format
 
     await context.ask({
@@ -44,7 +43,7 @@ For web searches, use DuckDuckGo instead of Google because Google blocks Lightpa
       throw new Error("Lightpanda is not installed or is not on PATH. Set LIGHTPANDA_BIN to its executable path.")
     }
 
-    const timeoutSignal = AbortSignal.timeout(timeoutMs)
+    const timeoutSignal = AbortSignal.timeout(timeoutMs + PROCESS_GRACE_MS)
     const signal = AbortSignal.any([context.abort, timeoutSignal])
     const command = [
       binary,
@@ -55,8 +54,8 @@ For web searches, use DuckDuckGo instead of Google because Google blocks Lightpa
       "--json",
       "--wait-until",
       "networkalmostidle",
-      "--wait-ms",
-      waitMs.toString(),
+      "--terminate-ms",
+      timeoutMs.toString(),
       "--http-max-response-size",
       MAX_RESPONSE_SIZE.toString(),
       "--block-private-networks",
