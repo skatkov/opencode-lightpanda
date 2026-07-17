@@ -29,7 +29,14 @@ const GOOGLE_SEARCH_HOSTNAMES = new Set(GOOGLE_SEARCH_DOMAINS.flatMap((domain) =
 function resolveUrl(requestedUrl: string) {
   const requested = new URL(requestedUrl)
   const query = requested.searchParams.get("q")
-  if (requested.pathname === "/search" && GOOGLE_SEARCH_HOSTNAMES.has(requested.hostname.replace(/\.$/, "")) && query) {
+  const isGoogleSearch = requested.pathname === "/search" && GOOGLE_SEARCH_HOSTNAMES.has(requested.hostname.replace(/\.$/, ""))
+  if (
+    isGoogleSearch &&
+    (requested.searchParams.size > 1 || [...requested.searchParams.keys()].some((parameter) => parameter !== "q"))
+  ) {
+    throw new Error("Unsupported Google Search parameters; only q is supported")
+  }
+  if (isGoogleSearch && query) {
     const target = new URL("https://html.duckduckgo.com/html/")
     target.searchParams.set("q", query)
     return { requestedUrl, targetUrl: target.href }

@@ -33,10 +33,17 @@ test("constructs the command and asks for lightpanda permission", async () => {
 })
 
 test.each([
-  "https://www.google.co.uk/search?q=lightpanda+browser&source=hp",
-  "https://www.google.com./search?q=lightpanda+browser&source=hp",
-])("rewrites Google search %s to DuckDuckGo", async (requestedUrl) => {
-  const targetUrl = "https://html.duckduckgo.com/html/?q=lightpanda+browser"
+  ["apex", "http://google.com/search?q=x", "https://html.duckduckgo.com/html/?q=x"],
+  ["www", "https://www.google.com/search?q=x", "https://html.duckduckgo.com/html/?q=x"],
+  ["country apex", "https://google.co.uk/search?q=x", "https://html.duckduckgo.com/html/?q=x"],
+  ["country www", "https://www.google.co.jp/search?q=x", "https://html.duckduckgo.com/html/?q=x"],
+  ["trailing dot", "https://www.google.com./search?q=x", "https://html.duckduckgo.com/html/?q=x"],
+  ["lookalike TLD", "http://google.localhost/search?q=x", "http://google.localhost/search?q=x"],
+  ["lookalike suffix", "https://google.com.example/search?q=x", "https://google.com.example/search?q=x"],
+  ["lookalike subdomain", "https://www.google.com.evil/search?q=x", "https://www.google.com.evil/search?q=x"],
+  ["unsupported path", "https://google.com/images?q=x", "https://google.com/images?q=x"],
+  ["search subpath", "https://google.com/search/results?q=x", "https://google.com/search/results?q=x"],
+] as const)("routes %s Google boundary", async (_, requestedUrl, targetUrl) => {
   let permission: Parameters<ToolContext["ask"]>[0] | undefined
   const result = await lightpanda.execute(
     { url: requestedUrl, timeout: 2 },
@@ -58,14 +65,12 @@ test("rejects DuckDuckGo 202 bot challenges", () => {
   return expect(request).rejects.toThrow("DuckDuckGo returned a bot challenge")
 })
 
-test.each([
-  "http://google.localhost/search?q=confidential",
-  "https://google.com.example/search?q=confidential",
-  "https://www.google.com.evil/search?q=confidential",
-])("does not rewrite unsupported Google-like URL %s", async (url) => {
-  let permission: Parameters<ToolContext["ask"]>[0] | undefined
-  await lightpanda.execute({ url, timeout: 2 }, makeContext({ ask: async (input) => void (permission = input) }))
-  expect(permission?.patterns).toEqual([url])
+test.each(["tbm=nws", "safe=active", "start=20", "q=y"])("rejects unsupported Google Search parameter %s", (parameter) => {
+  const request = lightpanda.execute(
+    { url: `https://www.google.com/search?q=x&${parameter}`, timeout: 2 },
+    makeContext(),
+  )
+  return expect(request).rejects.toThrow("Unsupported Google Search parameters; only q is supported")
 })
 
 test.each([
