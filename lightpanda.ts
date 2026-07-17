@@ -3,7 +3,19 @@ import { tool, type Plugin } from "@opencode-ai/plugin"
 const MAX_RESPONSE_SIZE = 5 * 1024 * 1024
 const MAX_TIMEOUT_SECONDS = 120
 const PROCESS_GRACE_MS = 1_000
-const GOOGLE_SEARCH_ORIGINS = new Set(["https://www.google.com", "https://www.google.co.uk"])
+const GOOGLE_SEARCH_HOSTNAMES = new Set(["google.com", "www.google.com", "google.co.uk", "www.google.co.uk"])
+
+export function resolveUrl(requestedUrl: string) {
+  const requested = new URL(requestedUrl)
+  const query = requested.searchParams.get("q")
+  if (requested.pathname === "/search" && GOOGLE_SEARCH_HOSTNAMES.has(requested.hostname) && query) {
+    const target = new URL("https://html.duckduckgo.com/html/")
+    target.searchParams.set("q", query)
+    return { requestedUrl, targetUrl: target.href }
+  }
+
+  return { requestedUrl, targetUrl: requestedUrl }
+}
 
 const responseSchema = tool.schema.object({
   url: tool.schema.string(),
@@ -13,7 +25,8 @@ const responseSchema = tool.schema.object({
 })
 
 const lightpanda = tool({
-  description: "Fetch a URL with Lightpanda browser to extract content as markdown or json.",
+  description:
+    "Fetch a URL with Lightpanda browser to extract content as markdown or json. Google Search URLs are fetched through DuckDuckGo HTML.",
   args: {
     url: tool.schema.url({ protocol: /^https?$/, normalize: true }).describe("The fully qualified HTTP or HTTPS URL to fetch"),
     format: tool.schema
@@ -31,19 +44,13 @@ const lightpanda = tool({
     const timeoutMs = Math.ceil(timeout * 1000)
     const waitMs = Math.max(1, timeoutMs - PROCESS_GRACE_MS)
     const dump = format === "json" ? "semantic_tree" : format
-    const target = new URL(url)
-    const query = target.searchParams.get("q")
-    if (target.pathname === "/search" && GOOGLE_SEARCH_ORIGINS.has(target.origin) && query) {
-      const search = new URL("https://html.duckduckgo.com/html/")
-      search.searchParams.set("q", query)
-      url = search.href
-    }
+    const { requestedUrl, targetUrl } = resolveUrl(url)
 
     await context.ask({
       permission: "lightpanda",
-      patterns: [url],
+      patterns: [targetUrl],
       always: ["*"],
-      metadata: { url, format, timeout },
+      metadata: { requestedUrl, targetUrl, format, timeout },
     })
 
     const binary = process.env.LIGHTPANDA_BIN || Bun.which("lightpanda")
@@ -56,7 +63,7 @@ const lightpanda = tool({
     const command = [
       binary,
       "fetch",
-      url,
+      targetUrl,
       "--dump",
       dump,
       "--json",
@@ -99,7 +106,7 @@ const lightpanda = tool({
     return {
       title: `${response.url} (${contentType})`,
       output: response.content,
-      metadata: { backend: "lightpanda", format, httpStatus: response.http_status },
+      metadata: { backend: "lightpanda", format, httpStatus: response.http_status, requestedUrl, targetUrl },
     }
   },
 })

@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test"
 import type { ToolContext } from "@opencode-ai/plugin"
-import plugin from "./lightpanda"
+import plugin, { resolveUrl } from "./lightpanda"
 
 process.env.LIGHTPANDA_BIN = `${import.meta.dir}/test/fixtures/lightpanda`
 const { lightpanda } = (await plugin()).tool
@@ -33,15 +33,34 @@ test("constructs the command and asks for lightpanda permission", async () => {
 })
 
 test("rewrites Google searches to DuckDuckGo", async () => {
+  const requestedUrl = "https://www.google.co.uk/search?q=lightpanda+browser&source=hp"
+  const targetUrl = "https://html.duckduckgo.com/html/?q=lightpanda+browser"
   let permission: Parameters<ToolContext["ask"]>[0] | undefined
   const result = await lightpanda.execute(
-    { url: "https://www.google.co.uk/search?q=lightpanda+browser&source=hp", timeout: 2 },
+    { url: requestedUrl, timeout: 2 },
     makeContext({ ask: async (input) => void (permission = input) }),
   )
 
   if (typeof result === "string") throw new Error("Expected a structured tool result")
-  expect(permission?.patterns).toEqual(["https://html.duckduckgo.com/html/?q=lightpanda+browser"])
-  expect(result.title).toStartWith("https://html.duckduckgo.com/html/?q=lightpanda+browser")
+  expect(resolveUrl(requestedUrl)).toEqual({ requestedUrl, targetUrl })
+  expect(permission?.patterns).toEqual([targetUrl])
+  expect(permission?.metadata).toMatchObject({ requestedUrl, targetUrl })
+  expect(result.title).toStartWith(targetUrl)
+  expect(result.metadata).toMatchObject({ requestedUrl, targetUrl })
+})
+
+test.each([
+  ["http", "google.com"],
+  ["https", "google.com"],
+  ["http", "www.google.com"],
+  ["https", "www.google.com"],
+  ["http", "google.co.uk"],
+  ["https", "google.co.uk"],
+  ["http", "www.google.co.uk"],
+  ["https", "www.google.co.uk"],
+] as const)("rewrites %s://%s searches", (scheme, hostname) => {
+  const requestedUrl = `${scheme}://${hostname}/search?q=lightpanda+browser&source=hp`
+  expect(resolveUrl(requestedUrl).targetUrl).toBe("https://html.duckduckgo.com/html/?q=lightpanda+browser")
 })
 
 test.each([

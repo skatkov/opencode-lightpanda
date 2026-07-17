@@ -67,8 +67,9 @@ Load the checkout directly by adding it to `~/.config/opencode/opencode.json`:
 - Blocks private-network requests, including subresources initiated by page JavaScript.
 - Disables Lightpanda telemetry unless `LIGHTPANDA_DISABLE_TELEMETRY` is already set.
 - Starts a fresh Lightpanda process for every call, so cookies and browser state are not retained.
+- Rewrites Google Search URLs to DuckDuckGo's HTML endpoint. Permission and result metadata preserve both the requested and target URLs.
 
-This intentionally does not include web search, stateful CDP sessions, or browser interaction tools. Lightpanda's MCP server already covers those use cases without expanding a fetch replacement into a second browser harness.
+This intentionally does not include a separate web search tool, stateful CDP sessions, or browser interaction tools. Lightpanda's MCP server already covers those use cases without expanding a fetch replacement into a second browser harness.
 
 The tools can be controlled independently:
 
