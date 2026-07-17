@@ -45,6 +45,16 @@ test("rewrites Google searches to DuckDuckGo", async () => {
 })
 
 test.each([
+  "http://google.localhost/search?q=confidential",
+  "https://google.com.example/search?q=confidential",
+  "https://www.google.com.evil/search?q=confidential",
+])("does not rewrite unsupported Google-like URL %s", async (url) => {
+  let permission: Parameters<ToolContext["ask"]>[0] | undefined
+  await lightpanda.execute({ url, timeout: 2 }, makeContext({ ask: async (input) => void (permission = input) }))
+  expect(permission?.patterns).toEqual([url])
+})
+
+test.each([
   ["rejects non-success HTTP statuses", "not-found", 1, "HTTP 404", false],
   ["rejects malformed JSON", "malformed", 1, "invalid JSON", false],
   ["rejects oversized output", "oversized", 1, "Response too large", false],

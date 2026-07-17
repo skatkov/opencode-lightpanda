@@ -3,7 +3,7 @@ import { tool, type Plugin } from "@opencode-ai/plugin"
 const MAX_RESPONSE_SIZE = 5 * 1024 * 1024
 const MAX_TIMEOUT_SECONDS = 120
 const PROCESS_GRACE_MS = 1_000
-const GOOGLE_SEARCH_HOST = /(^|\.)google\.[a-z.]+$/
+const GOOGLE_SEARCH_ORIGINS = new Set(["https://www.google.com", "https://www.google.co.uk"])
 
 const responseSchema = tool.schema.object({
   url: tool.schema.string(),
@@ -33,7 +33,7 @@ const lightpanda = tool({
     const dump = format === "json" ? "semantic_tree" : format
     const target = new URL(url)
     const query = target.searchParams.get("q")
-    if (target.pathname === "/search" && GOOGLE_SEARCH_HOST.test(target.hostname) && query) {
+    if (target.pathname === "/search" && GOOGLE_SEARCH_ORIGINS.has(target.origin) && query) {
       const search = new URL("https://html.duckduckgo.com/html/")
       search.searchParams.set("q", query)
       url = search.href
