@@ -49,13 +49,10 @@ test("rewrites Google searches to DuckDuckGo", async () => {
   expect(result.metadata).toMatchObject({ requestedUrl, targetUrl })
 })
 
-const googleSearchCases = GOOGLE_SEARCH_DOMAINS.flatMap((domain) =>
+test.each(GOOGLE_SEARCH_DOMAINS.flatMap((domain) =>
   [domain, `www.${domain}`].flatMap((hostname) => ["http", "https"].map((scheme) => [scheme, hostname] as const)),
-)
-
-test.each(googleSearchCases)("rewrites %s://%s searches", (scheme, hostname) => {
-  const requestedUrl = `${scheme}://${hostname}/search?q=lightpanda+browser&source=hp`
-  expect(resolveUrl(requestedUrl).targetUrl).toBe("https://html.duckduckgo.com/html/?q=lightpanda+browser")
+))("rewrites %s://%s searches", (scheme, hostname) => {
+  expect(resolveUrl(`${scheme}://${hostname}/search?q=lightpanda+browser&source=hp`).targetUrl).toBe("https://html.duckduckgo.com/html/?q=lightpanda+browser")
 })
 
 test.each([
