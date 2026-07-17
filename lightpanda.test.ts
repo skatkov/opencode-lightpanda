@@ -8,7 +8,7 @@ const { lightpanda } = (await plugin()).tool
 test("constructs the command and asks for lightpanda permission", async () => {
   let permission: Parameters<ToolContext["ask"]>[0] | undefined
   const result = await lightpanda.execute(
-    { url: "https://example.test/command", format: "json", timeout: 1 },
+    { url: "https://example.test/command", format: "json", timeout: 2 },
     makeContext({ ask: async (input) => void (permission = input) }),
   )
 
@@ -19,6 +19,8 @@ test("constructs the command and asks for lightpanda permission", async () => {
     "--dump",
     "semantic_tree",
     "--json",
+    "--wait-until",
+    "networkalmostidle",
     "--wait-ms",
     "1000",
     "--http-max-response-size",

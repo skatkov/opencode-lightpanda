@@ -2,6 +2,7 @@ import { tool, type Plugin } from "@opencode-ai/plugin"
 
 const MAX_RESPONSE_SIZE = 5 * 1024 * 1024
 const MAX_TIMEOUT_SECONDS = 120
+const PROCESS_GRACE_MS = 1_000
 
 const responseSchema = tool.schema.object({
   url: tool.schema.string(),
@@ -28,6 +29,7 @@ For web searches, use DuckDuckGo instead of Google because Google blocks Lightpa
   },
   async execute({ url, format = "markdown", timeout = 30 }, context) {
     const timeoutMs = Math.ceil(timeout * 1000)
+    const waitMs = Math.max(1, timeoutMs - PROCESS_GRACE_MS)
     const dump = format === "json" ? "semantic_tree" : format
 
     await context.ask({
@@ -51,8 +53,10 @@ For web searches, use DuckDuckGo instead of Google because Google blocks Lightpa
       "--dump",
       dump,
       "--json",
+      "--wait-until",
+      "networkalmostidle",
       "--wait-ms",
-      timeoutMs.toString(),
+      waitMs.toString(),
       "--http-max-response-size",
       MAX_RESPONSE_SIZE.toString(),
       "--block-private-networks",
