@@ -10,12 +10,15 @@ if (url.pathname === "/malformed") {
 } else if (url.pathname === "/slow") {
   await Bun.sleep(10_000)
 } else {
+  const challenge = url.hostname === "html.duckduckgo.com" && url.searchParams.get("q") === "challenge"
   process.stdout.write(
     JSON.stringify({
       url: url.href,
-      http_status: url.pathname === "/not-found" ? 404 : 200,
+      http_status: challenge ? 202 : url.pathname === "/not-found" ? 404 : 200,
       headers: [{ name: "Content-Type", value: "text/plain" }],
-      content: url.pathname === "/command" ? JSON.stringify(args) : "fixture content",
+      content: challenge
+        ? "Unfortunately, bots use DuckDuckGo too."
+        : url.pathname === "/command" ? JSON.stringify(args) : "fixture content",
     }),
   )
 }

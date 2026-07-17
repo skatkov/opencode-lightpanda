@@ -49,6 +49,14 @@ test("rewrites Google searches to DuckDuckGo", async () => {
   expect(result.metadata).toMatchObject({ requestedUrl, targetUrl })
 })
 
+test("rejects DuckDuckGo 202 bot challenges", () => {
+  const request = lightpanda.execute(
+    { url: "https://www.google.com/search?q=challenge", timeout: 2 },
+    makeContext(),
+  )
+  return expect(request).rejects.toThrow("DuckDuckGo returned a bot challenge")
+})
+
 test.each(GOOGLE_SEARCH_DOMAINS.flatMap((domain) =>
   [domain, `www.${domain}`].flatMap((hostname) => ["http", "https"].map((scheme) => [scheme, hostname] as const)),
 ))("rewrites %s://%s searches", (scheme, hostname) => {

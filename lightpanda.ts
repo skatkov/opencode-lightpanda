@@ -122,6 +122,12 @@ const lightpanda = tool({
     if (response.http_status < 200 || response.http_status >= 300) {
       throw new Error(`Request failed with HTTP ${response.http_status}`)
     }
+    if (
+      new URL(targetUrl).hostname === "html.duckduckgo.com" &&
+      response.content.includes("Unfortunately, bots use DuckDuckGo too.")
+    ) {
+      throw new Error("DuckDuckGo returned a bot challenge")
+    }
 
     const contentType = response.headers.find((header) => header.name.toLowerCase() === "content-type")?.value ?? ""
     return {
