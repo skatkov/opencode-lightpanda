@@ -32,8 +32,10 @@ test("constructs the command and asks for lightpanda permission", async () => {
   expect(permission?.permission).toBe("lightpanda")
 })
 
-test("rewrites Google searches to DuckDuckGo", async () => {
-  const requestedUrl = "https://www.google.co.uk/search?q=lightpanda+browser&source=hp"
+test.each([
+  "https://www.google.co.uk/search?q=lightpanda+browser&source=hp",
+  "https://www.google.com./search?q=lightpanda+browser&source=hp",
+])("rewrites Google search %s to DuckDuckGo", async (requestedUrl) => {
   const targetUrl = "https://html.duckduckgo.com/html/?q=lightpanda+browser"
   let permission: Parameters<ToolContext["ask"]>[0] | undefined
   const result = await lightpanda.execute(

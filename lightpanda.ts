@@ -29,7 +29,7 @@ const GOOGLE_SEARCH_HOSTNAMES = new Set(GOOGLE_SEARCH_DOMAINS.flatMap((domain) =
 function resolveUrl(requestedUrl: string) {
   const requested = new URL(requestedUrl)
   const query = requested.searchParams.get("q")
-  if (requested.pathname === "/search" && GOOGLE_SEARCH_HOSTNAMES.has(requested.hostname) && query) {
+  if (requested.pathname === "/search" && GOOGLE_SEARCH_HOSTNAMES.has(requested.hostname.replace(/\.$/, "")) && query) {
     const target = new URL("https://html.duckduckgo.com/html/")
     target.searchParams.set("q", query)
     return { requestedUrl, targetUrl: target.href }
