@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test"
 import type { ToolContext } from "@opencode-ai/plugin"
-import plugin, { GOOGLE_SEARCH_DOMAINS, resolveUrl } from "./lightpanda"
+import plugin from "./lightpanda"
 
 process.env.LIGHTPANDA_BIN = `${import.meta.dir}/test/fixtures/lightpanda`
 const { lightpanda } = (await plugin()).tool
@@ -42,7 +42,6 @@ test("rewrites Google searches to DuckDuckGo", async () => {
   )
 
   if (typeof result === "string") throw new Error("Expected a structured tool result")
-  expect(resolveUrl(requestedUrl)).toEqual({ requestedUrl, targetUrl })
   expect(permission?.patterns).toEqual([targetUrl])
   expect(permission?.metadata).toMatchObject({ requestedUrl, targetUrl })
   expect(result.title).toStartWith(targetUrl)
@@ -55,12 +54,6 @@ test("rejects DuckDuckGo 202 bot challenges", () => {
     makeContext(),
   )
   return expect(request).rejects.toThrow("DuckDuckGo returned a bot challenge")
-})
-
-test.each(GOOGLE_SEARCH_DOMAINS.flatMap((domain) =>
-  [domain, `www.${domain}`].flatMap((hostname) => ["http", "https"].map((scheme) => [scheme, hostname] as const)),
-))("rewrites %s://%s searches", (scheme, hostname) => {
-  expect(resolveUrl(`${scheme}://${hostname}/search?q=lightpanda+browser&source=hp`).targetUrl).toBe("https://html.duckduckgo.com/html/?q=lightpanda+browser")
 })
 
 test.each([

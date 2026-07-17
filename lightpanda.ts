@@ -5,7 +5,7 @@ const MAX_TIMEOUT_SECONDS = 120
 const PROCESS_GRACE_MS = 1_000
 
 // Vendored from https://www.google.com/supported_domains on 2026-07-17.
-export const GOOGLE_SEARCH_DOMAINS = `google.com google.ad google.ae google.com.af google.com.ag google.al google.am google.co.ao google.com.ar google.as
+const GOOGLE_SEARCH_DOMAINS = `google.com google.ad google.ae google.com.af google.com.ag google.al google.am google.co.ao google.com.ar google.as
 google.at google.com.au google.az google.ba google.com.bd google.be google.bf google.bg google.com.bh google.bi
 google.bj google.com.bn google.com.bo google.com.br google.bs google.bt google.co.bw google.by google.com.bz google.ca
 google.cd google.cf google.cg google.ch google.ci google.co.ck google.cl google.cm google.cn google.com.co
@@ -26,7 +26,7 @@ google.co.tz google.com.ua google.co.ug google.co.uk google.com.uy google.co.uz 
 google.vu google.ws google.rs google.co.za google.co.zm google.co.zw google.cat`.split(/\s+/)
 const GOOGLE_SEARCH_HOSTNAMES = new Set(GOOGLE_SEARCH_DOMAINS.flatMap((domain) => [domain, `www.${domain}`]))
 
-export function resolveUrl(requestedUrl: string) {
+function resolveUrl(requestedUrl: string) {
   const requested = new URL(requestedUrl)
   const query = requested.searchParams.get("q")
   if (requested.pathname === "/search" && GOOGLE_SEARCH_HOSTNAMES.has(requested.hostname) && query) {
