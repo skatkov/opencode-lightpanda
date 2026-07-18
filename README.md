@@ -2,11 +2,12 @@
 A Lightpanda browser plugin/tool for OpenCode. Lightpanda browser is like WebFetch tool on steroids.
 
 ## Features
+
 - Headless
 - 10x faster than headless Chrome, 16x less memory
-- Return markdown page without ads or clutter
-- Also returns extracted JSON data
-- Handles JS heavy websites like a pro
+- Returns markdown pages without ads or clutter
+- Or returns extracted JSON data
+- Handles JS-heavy websites like a pro
 
 ## Requirements
 
