@@ -34,6 +34,7 @@ Quit and restart OpenCode.
 If OpenCode cannot find Lightpanda, start it with `LIGHTPANDA_BIN` set to the executable's absolute path.
 
 ## Usage
+Starts a fresh Lightpanda process for every call, so cookies and browser state are not retained.
 
 ```ts
 lightpanda({
@@ -61,16 +62,7 @@ Load the checkout directly by adding it to `~/.config/opencode/opencode.json`:
 }
 ```
 
-## Behavior
-
-- Adds a distinct `lightpanda` tool with its own URL permission.
-- Returns an error for non-2xx responses and responses over 5 MB.
-- Blocks private-network requests, including subresources initiated by page JavaScript.
-- Disables Lightpanda telemetry unless `LIGHTPANDA_DISABLE_TELEMETRY` is already set.
-- Starts a fresh Lightpanda process for every call, so cookies and browser state are not retained.
-
-This intentionally does not include web search, stateful CDP sessions, or browser interaction tools. Lightpanda's MCP server already covers those use cases without expanding a fetch replacement into a second browser harness.
-
+## Config
 The tools can be controlled independently:
 
 ```json
