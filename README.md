@@ -6,7 +6,7 @@ A Lightpanda browser plugin/tool for OpenCode. It is like WebFetch tool on stero
 - Headless
 - 10x faster than headless Chrome, 16x less memory
 - Returns markdown pages without ads or clutter
-- Or returns extracted JSON data
+- Can also extract JSON data
 - Handles JS-heavy websites like a pro
 
 ## Requirements
