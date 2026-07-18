@@ -13,7 +13,7 @@ const responseSchema = tool.schema.object({
 
 const lightpanda = tool({
   description: `Fetch a URL with Lightpanda browser to extract content as markdown or json.
-For web searches, use DuckDuckGo instead of Google because Google blocks Lightpanda due to browser fingerprinting.`,
+For web searches, use html.duckduckgo.com instead of Google because Google blocks Lightpanda due to browser fingerprinting.`,
   args: {
     url: tool.schema.url({ protocol: /^https?$/, normalize: true }).describe("The fully qualified HTTP or HTTPS URL to fetch"),
     format: tool.schema

@@ -1,6 +1,6 @@
 {
   "name": "opencode-lightpanda",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Lightpanda-powered web fetching for OpenCode",
   "type": "module",
   "main": "lightpanda.ts",
