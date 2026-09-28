@@ -48,17 +48,13 @@ try {
     throw new Error(`OpenCode exited with ${exitCode}: ${error ?? stderr.trim()}`)
   }
 
-  const call = events.find((event) => {
-    if (event.type !== "tool_use" || event.part?.state?.status !== "completed") return false
-    return event.part.tool === "lightpanda" || event.part.state.metadata?.metadata?.toolCalls?.some(
-      (tool) => tool.tool === "lightpanda" && tool.status === "completed",
-    )
-  })
+  const call = events.find((event) =>
+    event.type === "tool_use" && event.part?.tool === "lightpanda" && event.part.state?.status === "completed"
+  )
   if (!call) {
     const tools = events.filter((event) => event.type === "tool_use").map((event) => ({
       tool: event.part?.tool,
       status: event.part?.state?.status,
-      nested: event.part?.state?.metadata?.metadata?.toolCalls,
     }))
     const logs = stderr.split("\n").filter((line) => line.includes("loading plugin") || line.includes("failed to load plugin"))
     throw new Error(`OpenCode did not call lightpanda (session ${events[0]?.sessionID}; tools: ${JSON.stringify(tools)}; logs: ${logs.join("\n")})`)
@@ -98,7 +94,6 @@ type RunEvent = {
     state?: {
       status?: string
       output?: string
-      metadata?: { metadata?: { toolCalls?: { tool: string; status: string }[] } }
     }
   }
 }
