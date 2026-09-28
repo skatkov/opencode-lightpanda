@@ -9,16 +9,7 @@ const tools: Info[] = []
 await plugin.setup({
   tool: {
     async transform(callback: (editor: ToolEditor) => void) {
-      callback({
-        list: () => [],
-        get: () => undefined,
-        namespace: () => {},
-        add: (tool) => {
-          tools.push(tool)
-        },
-        update: () => {},
-        remove: () => {},
-      })
+      callback({ add: (tool: Info) => void tools.push(tool) } as ToolEditor)
       return { async dispose() {} }
     },
   },
