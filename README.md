@@ -54,6 +54,8 @@ bun run check
 bun test
 ```
 
+For an end-to-end smoke test, run `bun run test:smoke`. It requires OpenCode V2 on `PATH` and a working default model (or set `OPENCODE_SMOKE_MODEL=provider/model#variant`). The test starts a private OpenCode server in a temporary project, loads this checkout, and calls the tool using the bundled Lightpanda fixture. It does not need network access to fetch a page, but it does make a model request, so it is not part of the regular test suite or CI.
+
 Load the checkout directly by adding it to `~/.config/opencode/opencode.json`:
 
 ```json
