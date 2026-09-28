@@ -1,19 +1,54 @@
 import { expect, test } from "bun:test"
-import type { ToolContext } from "@opencode-ai/plugin"
-import plugin from "./lightpanda"
+import type { Plugin } from "@opencode/plugin"
+import type { Info, ToolContext, ToolEditor } from "@opencode/plugin/promise/tool"
+import plugin from "./index"
 
 process.env.LIGHTPANDA_BIN = `${import.meta.dir}/test/fixtures/lightpanda`
-const { lightpanda } = (await plugin()).tool
 
-test("constructs the command and asks for lightpanda permission", async () => {
-  let permission: Parameters<ToolContext["ask"]>[0] | undefined
+const tools: Info[] = []
+await plugin.setup({
+  tool: {
+    async transform(callback: (editor: ToolEditor) => void) {
+      callback({
+        list: () => [],
+        get: () => undefined,
+        namespace: () => {},
+        add: (tool) => {
+          tools.push(tool)
+        },
+        update: () => {},
+        remove: () => {},
+      })
+      return { async dispose() {} }
+    },
+  },
+} as Plugin.Context)
+const lightpanda = tools[0]!
+
+test("registers the V2 lightpanda tool and permission action", () => {
+  expect(plugin.id).toBe("opencode-lightpanda")
+  expect(tools).toHaveLength(1)
+  expect(lightpanda.name).toBe("lightpanda")
+  expect(lightpanda.options?.permission).toBe("lightpanda")
+  expect(lightpanda.input).toMatchObject({
+    type: "object",
+    required: ["url"],
+    properties: {
+      url: { type: "string", format: "uri", pattern: "^https?://" },
+      format: { enum: ["markdown", "json", "semantic_tree"] },
+      timeout: { exclusiveMinimum: 0, maximum: 120 },
+    },
+  })
+})
+
+test("constructs the command and returns V2 content and metadata", async () => {
   const result = await lightpanda.execute(
     { url: "https://example.test/command", format: "json", timeout: 2 },
-    makeContext({ ask: async (input) => void (permission = input) }),
+    makeContext(),
   )
 
-  if (typeof result === "string") throw new Error("Expected a structured tool result")
-  expect(JSON.parse(result.output)).toEqual([
+  if (typeof result.content !== "string") throw new Error("Expected text content")
+  expect(JSON.parse(result.content)).toEqual([
     "fetch",
     "https://example.test/command",
     "--dump",
@@ -29,7 +64,25 @@ test("constructs the command and asks for lightpanda permission", async () => {
     "--log-level",
     "error",
   ])
-  expect(permission?.permission).toBe("lightpanda")
+  expect(result.metadata).toEqual({
+    backend: "lightpanda",
+    format: "json",
+    httpStatus: 200,
+    url: "https://example.test/command",
+    contentType: "text/plain",
+  })
+})
+
+test("defaults to markdown and a 30-second timeout", async () => {
+  const result = await lightpanda.execute({ url: "https://example.test/command" }, makeContext())
+  if (typeof result.content !== "string") throw new Error("Expected text content")
+  const args = JSON.parse(result.content) as string[]
+  expect(args.slice(args.indexOf("--dump"), args.indexOf("--json"))).toEqual(["--dump", "markdown"])
+  expect(args[args.indexOf("--terminate-ms") + 1]).toBe("30000")
+})
+
+test.each(["file:///etc/passwd", "not-a-url"])("rejects non-HTTP URLs: %s", (url) => {
+  return expect(lightpanda.execute({ url }, makeContext())).rejects.toThrow("fully qualified HTTP or HTTPS URL")
 })
 
 test.each([
@@ -41,23 +94,18 @@ test.each([
 ] as const)("%s", (_, path, timeout, error, abort) => {
   const request = lightpanda.execute(
     { url: `https://example.test/${path}`, timeout },
-    makeContext({ abort: abort ? AbortSignal.timeout(10) : undefined }),
+    makeContext(abort ? AbortSignal.timeout(10) : undefined),
   )
   return expect(request).rejects.toThrow(error)
 })
 
-function makeContext({
-  ask = async () => {},
-  abort = new AbortController().signal,
-}: { ask?: ToolContext["ask"]; abort?: AbortSignal } = {}) {
+function makeContext(signal = new AbortController().signal): ToolContext {
   return {
-    sessionID: "test",
-    messageID: "test",
-    agent: "test",
-    directory: process.cwd(),
-    worktree: process.cwd(),
-    abort,
-    metadata() {},
-    ask,
-  } satisfies ToolContext
+    sessionID: "test" as ToolContext["sessionID"],
+    messageID: "test" as ToolContext["messageID"],
+    agent: "test" as ToolContext["agent"],
+    id: "test" as ToolContext["id"],
+    signal,
+    async progress() {},
+  }
 }

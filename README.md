@@ -11,22 +11,22 @@ A Lightpanda browser plugin/tool for OpenCode. It is like WebFetch tool on stero
 
 ## Requirements
 
-- [OpenCode](https://opencode.ai/)
+- [OpenCode V2](https://opencode.ai/v2/docs/) (2.0.18 or newer)
 - [Lightpanda](https://lightpanda.io/docs/run-locally/installation/one-liner)
 - [Bun](https://bun.sh/) for development and tests
 
 ## Install
 
-Install Lightpanda, then install the plugin globally:
+Install Lightpanda, then add the plugin globally:
 
 ```sh
-opencode plugin -g opencode-lightpanda@latest
+opencode plugin add opencode-lightpanda@latest
 ```
 
 To update an existing installation:
 
 ```sh
-opencode plugin -g -f opencode-lightpanda@latest
+opencode plugin update opencode-lightpanda
 ```
 
 Quit and restart OpenCode. 
@@ -58,18 +58,32 @@ Load the checkout directly by adding it to `~/.config/opencode/opencode.json`:
 
 ```json
 {
-  "plugin": ["file:///absolute/path/to/opencode-lightpanda/lightpanda.ts"]
+  "$schema": "https://opencode.ai/config.json",
+  "plugins": ["/absolute/path/to/opencode-lightpanda"]
 }
 ```
 
+## Behavior
+
+- Adds a distinct `lightpanda` tool with its own permission action.
+- Returns an error for non-2xx responses and responses over 5 MB.
+- Blocks private-network requests, including subresources initiated by page JavaScript.
+- Disables Lightpanda telemetry unless `LIGHTPANDA_DISABLE_TELEMETRY` is already set.
+
+This intentionally does not include web search, stateful CDP sessions, or browser interaction tools. Lightpanda's MCP server already covers those use cases without expanding a fetch replacement into a second browser harness.
+
 ## Config
-The tools can be controlled independently:
+
+The tools can be controlled independently. To request approval before using Lightpanda, configure V2 permissions:
 
 ```json
 {
-  "permission": {
-    "webfetch": "deny",
-    "lightpanda": "allow"
-  }
+  "$schema": "https://opencode.ai/config.json",
+  "permissions": [
+    { "action": "webfetch", "resource": "*", "effect": "deny" },
+    { "action": "lightpanda", "resource": "*", "effect": "ask" }
+  ]
 }
 ```
+
+V2 custom tool permissions apply to the tool as a whole (`resource: "*"`); unlike the V1 plugin, it cannot request approval for each individual URL. Without an explicit rule, V2's default policy allows the tool. Set `effect` to `allow` or `deny` instead of `ask` to change that behavior.

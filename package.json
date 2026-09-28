@@ -6,6 +6,7 @@
   "main": "lightpanda.ts",
   "exports": "./lightpanda.ts",
   "files": [
+    "index.ts",
     "lightpanda.ts"
   ],
   "scripts": {
@@ -23,10 +24,12 @@
   "author": "Stanislav (Stas) Katkov <git@skatkov.com>",
   "license": "MIT",
   "dependencies": {
-    "@opencode-ai/plugin": "^1.18.2"
+    "@opencode/plugin": "^2.0.18",
+    "zod": "^4.1.8"
   },
   "devDependencies": {
     "@types/bun": "latest",
+    "@types/json-schema": "^7.0.15",
     "typescript": "latest"
   }
 }
