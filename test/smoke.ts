@@ -1,13 +1,11 @@
-import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises"
+import { mkdtemp, rm, writeFile } from "node:fs/promises"
 import { tmpdir } from "node:os"
 import { join, resolve } from "node:path"
 
 const opencode = Bun.which("opencode")
 if (!opencode) throw new Error("OpenCode V2 must be on PATH to run the smoke test")
 
-const scratch = join(tmpdir(), "opencode")
-await mkdir(scratch, { recursive: true })
-const project = await mkdtemp(join(scratch, "lightpanda-smoke-"))
+const project = await mkdtemp(join(tmpdir(), "lightpanda-smoke-"))
 let sessionID: string | undefined
 
 try {
