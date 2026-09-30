@@ -92,6 +92,31 @@ test.each([
   return expect(request).rejects.toThrow(error)
 })
 
+test.each([
+  ["tls-error", "TLS handshake failed (SslConnectError)."],
+  ["dns-error", "DNS lookup failed (CouldntResolveHost)."],
+] as const)("uses structured %s diagnostics instead of stderr", async (path, message) => {
+  await expect(lightpanda.execute({ url: `https://example.test/${path}` }, makeContext())).rejects.toThrow(
+    `Lightpanda could not fetch https://example.test/${path}:\n${message} No HTTP response received.`,
+  )
+})
+
+test("falls back to a bounded stderr excerpt when failure JSON is invalid", async () => {
+  const error = await lightpanda.execute({ url: "https://example.test/bad-failure-json" }, makeContext()).catch(
+    (error: Error) => error,
+  )
+  if (!(error instanceof Error)) throw new Error("Expected fetch to fail")
+  expect(error.message).toStartWith("Lightpanda could not fetch https://example.test/bad-failure-json:\nraw failure ")
+  expect(error.message.length).toBeLessThan(400)
+  expect(error.message).not.toContain("startup notice")
+})
+
+test("reports the exit status when neither JSON nor stderr has a diagnostic", () => {
+  return expect(lightpanda.execute({ url: "https://example.test/empty-failure" }, makeContext())).rejects.toThrow(
+    "Lightpanda could not fetch https://example.test/empty-failure:\nLightpanda exited with status 1",
+  )
+})
+
 function makeContext(signal = new AbortController().signal): ToolContext {
   return {
     sessionID: "test" as ToolContext["sessionID"],

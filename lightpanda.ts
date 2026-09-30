@@ -5,12 +5,18 @@ import { z } from "zod"
 const MAX_RESPONSE_SIZE = 5 * 1024 * 1024
 const MAX_TIMEOUT_SECONDS = 120
 const PROCESS_GRACE_MS = 1_000
+const MAX_ERROR_EXCERPT = 300
 
 const responseSchema = z.object({
   url: z.string(),
   http_status: z.number(),
   headers: z.array(z.object({ name: z.string(), value: z.string() })),
   content: z.string(),
+})
+
+const failureSchema = z.object({
+  error: z.string().trim().min(1),
+  http_status: z.number().optional(),
 })
 
 type FetchInput = { url: string; format?: "markdown" | "json" | "semantic_tree"; timeout?: number }
@@ -108,9 +114,17 @@ async function fetchPage(input: unknown, context: ToolContext) {
   ])
   if (context.signal.aborted) throw new Error("Request aborted")
   if (timeoutSignal.aborted) throw new Error(`Request timed out after ${timeout} seconds`)
-  if (exitCode !== 0) throw new Error(stderr.trim() || `Lightpanda exited with status ${exitCode}`)
   if (Buffer.byteLength(stdout) > MAX_RESPONSE_SIZE) {
     throw new Error("Response too large (exceeds 5MB limit)")
+  }
+  if (exitCode !== 0) {
+    const failure = parseFailure(stdout)
+    const code = failure?.error.replace(/\s+/g, " ").slice(0, MAX_ERROR_EXCERPT)
+    const label = code === "SslConnectError" ? "TLS handshake failed" : code === "CouldntResolveHost" ? "DNS lookup failed" : "Fetch failed"
+    const detail = failure
+      ? `${label} (${code}).${failure.http_status === 0 ? " No HTTP response received." : ""}`
+      : stderr.trim().replace(/\s+/g, " ").slice(0, MAX_ERROR_EXCERPT) || `Lightpanda exited with status ${exitCode}`
+    throw new Error(`Lightpanda could not fetch ${url}:\n${detail}`)
   }
 
   const response = parseResponse(stdout)
@@ -135,4 +149,13 @@ function parseResponse(output: string) {
 
   if (!response.success) throw new Error("Lightpanda returned an unexpected response")
   return response.data
+}
+
+function parseFailure(output: string) {
+  try {
+    const response = failureSchema.safeParse(JSON.parse(output))
+    return response.success ? response.data : undefined
+  } catch {
+    return undefined
+  }
 }
