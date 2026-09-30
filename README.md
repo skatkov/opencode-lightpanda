@@ -69,6 +69,7 @@ Load the checkout directly by adding it to `~/.config/opencode/opencode.json`:
 
 - Adds a distinct `lightpanda` tool with its own permission action.
 - Returns an error for non-2xx responses and responses over 5 MB.
+- Reports concise TLS/DNS fetch failures from Lightpanda's JSON diagnostics, with a bounded stderr fallback.
 - Blocks private-network requests, including subresources initiated by page JavaScript.
 - Disables Lightpanda telemetry unless `LIGHTPANDA_DISABLE_TELEMETRY` is already set.
 
