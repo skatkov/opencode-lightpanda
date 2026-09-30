@@ -54,6 +54,8 @@ test("constructs the command and returns V2 content and metadata", async () => {
     "--block-private-networks",
     "--log-level",
     "error",
+    "--log-filter",
+    "note",
   ])
   expect(result.metadata).toEqual({
     backend: "lightpanda",

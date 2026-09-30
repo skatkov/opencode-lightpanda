@@ -90,6 +90,8 @@ async function fetchPage(input: unknown, context: ToolContext) {
     "--block-private-networks",
     "--log-level",
     "error",
+    "--log-filter",
+    "note",
   ]
   const child = Bun.spawn(command, {
     stderr: "pipe",
