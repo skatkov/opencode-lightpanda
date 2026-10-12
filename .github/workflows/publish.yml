@@ -1,0 +1,52 @@
+name: Publish to npm
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: npm-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: oven-sh/setup-bun@v2
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+          package-manager-cache: false
+      - run: npm install --global npm@11.21.0
+      - run: bun install --frozen-lockfile
+      - name: Validate stable release
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from "node:assert/strict"
+          import { readFileSync } from "node:fs"
+
+          const { version, dependencies } = JSON.parse(readFileSync("package.json", "utf8"))
+          assert.match(version, /^[1-9]\d*\.\d+\.\d+$/, "Only stable V2 plugin releases may be published as latest")
+          assert.ok(dependencies["@opencode/plugin"], "Release must use the OpenCode V2 plugin API")
+          if (process.env.GITHUB_REF_TYPE === "tag") {
+            assert.equal(process.env.GITHUB_REF_NAME, `v${version}`, "Git tag must match package version")
+          }
+          NODE
+      - name: Publish using trusted publishing
+        # prepublishOnly runs the type check and tests before publication.
+        run: npm publish --access public --tag latest --provenance
+        env:
+          # Avoid setup-node's placeholder token masking an OIDC exchange failure.
+          NODE_AUTH_TOKEN: ""
+          NPM_CONFIG_LOGLEVEL: verbose
