@@ -40,3 +40,7 @@ jobs:
       - name: Publish using trusted publishing
         # prepublishOnly runs the type check and tests before publication.
         run: npm publish --access public --tag oidc-test --provenance
+        env:
+          # Avoid setup-node's placeholder token masking an OIDC exchange failure.
+          NODE_AUTH_TOKEN: ""
+          NPM_CONFIG_LOGLEVEL: verbose
