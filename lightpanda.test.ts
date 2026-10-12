@@ -21,6 +21,7 @@ test("registers the V2 lightpanda tool and permission action", () => {
   expect(tools).toHaveLength(1)
   expect(lightpanda.name).toBe("lightpanda")
   expect(lightpanda.options?.permission).toBe("lightpanda")
+  expect(lightpanda.options?.codemode).toBe(false)
   expect(lightpanda.input).toMatchObject({
     type: "object",
     required: ["url"],
@@ -30,10 +31,6 @@ test("registers the V2 lightpanda tool and permission action", () => {
       timeout: { exclusiveMinimum: 0, maximum: 120 },
     },
   })
-})
-
-test("exposes lightpanda directly instead of through Code Mode", () => {
-  expect(lightpanda.options?.codemode).toBe(false)
 })
 
 test("constructs the command and returns V2 content and metadata", async () => {
