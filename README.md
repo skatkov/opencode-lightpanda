@@ -1,5 +1,14 @@
 # opencode-lightpanda
-A Lightpanda browser plugin/tool for OpenCode. It is like WebFetch tool on steroids.
+A Lightpanda browser plugin/tool for OpenCode V2. It is like WebFetch tool on steroids.
+
+> **Breaking change in 1.0: OpenCode V2 migration.** Version 1.0.0 and newer require OpenCode V2 (2.0.18 or newer) and do not support OpenCode V1. If you are staying on V1, pin `opencode-lightpanda@0.2.2` instead of using `latest`.
+
+| Plugin version | Supported OpenCode version |
+| --- | --- |
+| `1.x` | OpenCode V2, 2.0.18 or newer |
+| `0.2.2` | OpenCode V1 |
+
+See [Migrating from 0.x](#migrating-from-0x) and the [1.0.0 release notes](CHANGELOG.md).
 
 ## Features
 
@@ -20,7 +29,7 @@ A Lightpanda browser plugin/tool for OpenCode. It is like WebFetch tool on stero
 Install Lightpanda, then add the plugin globally:
 
 ```sh
-opencode plugin add opencode-lightpanda@latest
+opencode plugin add opencode-lightpanda@1.0.0
 ```
 
 To update an existing installation:
@@ -32,6 +41,30 @@ opencode plugin update opencode-lightpanda
 Quit and restart OpenCode. 
 
 If OpenCode cannot find Lightpanda, start it with `LIGHTPANDA_BIN` set to the executable's absolute path.
+
+## Migrating from 0.x
+
+1. Upgrade to [OpenCode V2](https://opencode.ai/v2/docs/migrate-v1) (2.0.18 or newer) before upgrading this plugin. The 1.x plugin uses the new `@opencode/plugin` API; it cannot run in OpenCode V1.
+2. Install `opencode-lightpanda@1.0.0` with the command above. For a configuration-managed installation, replace any pinned 0.x package entry with the V2 package:
+
+   ```json
+   {
+     "$schema": "https://opencode.ai/config.json",
+     "plugins": ["opencode-lightpanda@^1.0.0"]
+   }
+   ```
+
+3. Review your permissions. V2 controls the `lightpanda` tool as a whole, not each URL. To retain explicit approval, use `{ "action": "lightpanda", "resource": "*", "effect": "ask" }` in the `permissions` array; see [Config](#config).
+4. Quit and restart OpenCode. The tool is still named `lightpanda`, with the same `url`, `format`, and `timeout` inputs.
+
+If you need to remain on OpenCode V1, keep the old plugin pinned in your V1 configuration:
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "plugin": ["opencode-lightpanda@0.2.2"]
+}
+```
 
 ## Usage
 Starts a fresh Lightpanda process for every call, so cookies and browser state are not retained.

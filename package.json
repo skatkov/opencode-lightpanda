@@ -1,13 +1,14 @@
 {
   "name": "opencode-lightpanda",
-  "version": "0.2.2",
-  "description": "Lightpanda-powered web fetching for OpenCode",
+  "version": "1.0.0",
+  "description": "Lightpanda-powered web fetching for OpenCode V2",
   "type": "module",
   "main": "lightpanda.ts",
   "exports": "./lightpanda.ts",
   "files": [
     "index.ts",
-    "lightpanda.ts"
+    "lightpanda.ts",
+    "CHANGELOG.md"
   ],
   "scripts": {
     "check": "tsc",
@@ -24,6 +25,10 @@
   ],
   "author": "Stanislav (Stas) Katkov <git@skatkov.com>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/skatkov/opencode-lightpanda.git"
+  },
   "dependencies": {
     "@opencode/plugin": "^2.0.18",
     "zod": "^4.1.8"
