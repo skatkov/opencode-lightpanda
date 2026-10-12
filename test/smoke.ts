@@ -13,7 +13,7 @@ try {
     join(project, "opencode.json"),
     JSON.stringify({
       $schema: "https://opencode.ai/config.json",
-      plugins: [resolve(import.meta.dir, "..")],
+      plugins: [resolve(import.meta.dir, "fixtures/smoke-plugin")],
       permissions: [{ action: "lightpanda", resource: "*", effect: "allow" }],
     }),
   )
@@ -48,12 +48,9 @@ try {
     throw new Error(`OpenCode exited with ${exitCode}: ${error ?? stderr.trim()}`)
   }
 
-  const call = events.find((event) => {
-    if (event.type !== "tool_use" || event.part?.state?.status !== "completed") return false
-    return event.part.tool === "lightpanda" || event.part.state.metadata?.metadata?.toolCalls?.some(
-      (tool) => tool.tool === "lightpanda" && tool.status === "completed",
-    )
-  })
+  const call = events.find((event) =>
+    event.type === "tool_use" && event.part?.tool === "lightpanda" && event.part.state?.status === "completed",
+  )
   if (!call) {
     const tools = events.filter((event) => event.type === "tool_use").map((event) => ({
       tool: event.part?.tool,
@@ -61,7 +58,7 @@ try {
       nested: event.part?.state?.metadata?.metadata?.toolCalls,
     }))
     const logs = stderr.split("\n").filter((line) => line.includes("loading plugin") || line.includes("failed to load plugin"))
-    throw new Error(`OpenCode did not call lightpanda (session ${events[0]?.sessionID}; tools: ${JSON.stringify(tools)}; logs: ${logs.join("\n")})`)
+    throw new Error(`OpenCode did not call lightpanda directly (session ${events[0]?.sessionID}; tools: ${JSON.stringify(tools)}; logs: ${logs.join("\n")})`)
   }
 
   const args = JSON.parse(call.part!.state!.output ?? "null") as unknown
@@ -72,7 +69,7 @@ try {
     throw new Error("Lightpanda did not receive the requested format and timeout")
   }
 
-  console.log("OpenCode V2 loaded and executed lightpanda")
+  console.log("OpenCode V2 loaded and directly executed lightpanda")
 } finally {
   try {
     if (sessionID) {

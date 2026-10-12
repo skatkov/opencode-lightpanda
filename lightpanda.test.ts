@@ -21,6 +21,7 @@ test("registers the V2 lightpanda tool and permission action", () => {
   expect(tools).toHaveLength(1)
   expect(lightpanda.name).toBe("lightpanda")
   expect(lightpanda.options?.permission).toBe("lightpanda")
+  expect(lightpanda.options?.codemode).toBe(false)
   expect(lightpanda.input).toMatchObject({
     type: "object",
     required: ["url"],
