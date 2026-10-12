@@ -32,6 +32,10 @@ test("registers the V2 lightpanda tool and permission action", () => {
   })
 })
 
+test("exposes lightpanda directly instead of through Code Mode", () => {
+  expect(lightpanda.options?.codemode).toBe(false)
+})
+
 test("constructs the command and returns V2 content and metadata", async () => {
   const result = await lightpanda.execute(
     { url: "https://example.test/command", format: "json", timeout: 2 },

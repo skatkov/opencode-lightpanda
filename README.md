@@ -8,7 +8,7 @@ A Lightpanda browser plugin/tool for OpenCode V2. It is like WebFetch tool on st
 | `1.x` | OpenCode V2, 2.0.18 or newer |
 | `0.2.2` | OpenCode V1 |
 
-See [Migrating from 0.x](#migrating-from-0x) and the [1.0.0 release notes](CHANGELOG.md).
+See [Migrating from 0.x](#migrating-from-0x) and the [release notes](CHANGELOG.md).
 
 ## Features
 
@@ -29,7 +29,7 @@ See [Migrating from 0.x](#migrating-from-0x) and the [1.0.0 release notes](CHANG
 Install Lightpanda, then add the plugin globally:
 
 ```sh
-opencode plugin add opencode-lightpanda@1.0.0
+opencode plugin add opencode-lightpanda@1.0.1
 ```
 
 To update an existing installation:
@@ -45,7 +45,7 @@ If OpenCode cannot find Lightpanda, start it with `LIGHTPANDA_BIN` set to the ex
 ## Migrating from 0.x
 
 1. Upgrade to [OpenCode V2](https://opencode.ai/v2/docs/migrate-v1) (2.0.18 or newer) before upgrading this plugin. The 1.x plugin uses the new `@opencode/plugin` API; it cannot run in OpenCode V1.
-2. Install `opencode-lightpanda@1.0.0` with the command above. For a configuration-managed installation, replace any pinned 0.x package entry with the V2 package:
+2. Install `opencode-lightpanda@1.0.1` with the command above. For a configuration-managed installation, replace any pinned 0.x package entry with the V2 package:
 
    ```json
    {
@@ -100,7 +100,7 @@ Load the checkout directly by adding it to `~/.config/opencode/opencode.json`:
 
 ## Behavior
 
-- Adds a distinct `lightpanda` tool with its own permission action.
+- Adds a directly callable `lightpanda` tool with its own permission action; no Code Mode `execute` wrapper is required.
 - Returns an error for non-2xx responses and responses over 5 MB.
 - Reports concise TLS/DNS fetch failures from Lightpanda's JSON diagnostics, with a bounded stderr fallback.
 - Blocks private-network requests, including subresources initiated by page JavaScript.

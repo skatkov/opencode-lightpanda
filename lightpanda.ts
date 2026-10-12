@@ -53,7 +53,7 @@ For web searches, use html.duckduckgo.com instead of Google because Google block
           required: ["url"],
           additionalProperties: false,
         },
-        options: { permission: "lightpanda" },
+        options: { permission: "lightpanda", codemode: false },
         execute: fetchPage,
       })
     })
