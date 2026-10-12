@@ -1,0 +1,42 @@
+name: Publish OIDC verification prerelease
+
+on:
+  push:
+    tags:
+      - "v*-oidc.*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: oven-sh/setup-bun@v2
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+          package-manager-cache: false
+      - run: npm install --global npm@11.21.0
+      - run: bun install --frozen-lockfile
+      - name: Validate verification prerelease
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from "node:assert/strict"
+          import { readFileSync } from "node:fs"
+
+          const { version } = JSON.parse(readFileSync("package.json", "utf8"))
+          assert.match(version, /^\d+\.\d+\.\d+-oidc\.\d+$/, "Only OIDC verification prereleases may be published")
+          if (process.env.GITHUB_REF_TYPE === "tag") {
+            assert.equal(process.env.GITHUB_REF_NAME, `v${version}`, "Git tag must match package version")
+          }
+          NODE
+      - name: Publish using trusted publishing
+        # prepublishOnly runs the type check and tests before publication.
+        run: npm publish --access public --tag oidc-test --provenance

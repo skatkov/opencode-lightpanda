@@ -1,6 +1,6 @@
 {
   "name": "opencode-lightpanda",
-  "version": "0.2.2",
+  "version": "0.2.3-oidc.0",
   "description": "Lightpanda-powered web fetching for OpenCode",
   "type": "module",
   "main": "lightpanda.ts",
@@ -22,6 +22,10 @@
   ],
   "author": "Stanislav (Stas) Katkov <git@skatkov.com>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/skatkov/opencode-lightpanda.git"
+  },
   "dependencies": {
     "@opencode-ai/plugin": "^1.18.2"
   },
